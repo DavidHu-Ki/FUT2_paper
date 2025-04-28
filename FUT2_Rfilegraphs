@@ -1,0 +1,32 @@
+install.packages("ggplot2")
+install.packages("binom")
+library(ggplot2)
+library (binom)
+
+data <- read.table('1_output.txt', header = TRUE)
+data <- data[!is.na(data$N_CHR_target), ]
+data <- data[!is.na(data$AF_target), ]
+conf_level <- 0.95
+# Calculate Wilson score CI
+data_no_na <- data[complete.cases(data$AF_target, data$N_CHR_target), ]
+ci <- binom.confint(data_no_na$AF_target*data_no_na$N_CHR_target, data_no_na$N_CHR_target, method = "wilson", conf.level = conf_level)
+data_no_na$ci_lower <- ci[, "lower"]
+data_no_na$ci_upper <- ci[, "upper"]
+write.csv (data_no_na, file="1_output.csv", sep= "\t")
+
+# Plotting
+ggplot(data_no_na, aes(x = -(START+STOP)/2, y =AF_target,)) +
+  geom_point(colour = "black") +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), colour = "red", alpha = 0.2) +
+  xlim(-10500, 0) +
+  ylim(0, 1) +
+  geom_vline(xintercept = -6000, linetype = "dashed", size = 1, colour = "red") +
+  annotate("text", x = -4700, y = 0.8, label = "Anatolian Migration", color = "red") +
+  geom_vline(xintercept = -3000, linetype = "dashed", size = 1, colour = "blue") +
+  annotate("text", x = -1300, y = 0.8, label = "Late Bronze Age Migration", color = "blue") +
+  labs(x = "Date calBP", y = "AF of Output_1") +
+  theme(axis.title = element_text(size = 25), 
+                axis.text = element_text(size = 25), 
+                plot.title = element_text(size = 15))
+
+
