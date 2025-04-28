@@ -18,30 +18,34 @@ Asia="\$44==142"
 EuropeandRussia="\$44==150"
 Oceania="\$44==009"
 EuropewestofUral="\$44==150 && \$18<=60"
+Westernasia="\$50==51 || \$50==31 || \$50==268 || \$50==368 || \$50==376 || \$50==400 || \$50==422 || \$50==760 || \$50==792 || \$50==887"
 
 #M49.Anno file 
 M49Anno="$HOME/Desktop/Stockholm_things/Basic_data/AADR/v62.0_1240k_public_M49_het.anno"
+
 #VCF file 
 VCF="$HOME/Desktop/Stockholm_things/Basic_data/AADR/v62.0_1240k_public.vcf.gz"
 
 #Output location 
 Output_location="$HOME/Desktop/Stockholm_things/FUT2/Code/"
 
-#Variants+Proxies used 
-Variant="19:49206674-49206674"
-Proxy1="19:49206417-49206417"
-Proxy2="19:49206172-49206172"
+#Variants+Proxies used in Hg19
+Variant="19:49206674-49206674" #rs601338
+Proxy1="19:49206417-49206417" #rs17849548
+Proxy2="19:49206172-49206172" #rs516246
 
 #Loop
-Location_1="$Britishisles" 
+Location_1="$EuropewestofUral" 
 Location_2="$Scandinavia"
 Location_3="$WestEu"
 Location_4="$CentralEu"
 Location_5="$Iberian"
 Location_6="$Italy"
 Location_7="$Balkan"
+Location_8="$Britishisles"
+Location_9="$Westernasia"
 
-Total_locations=7
+Total_locations=9
 for j in $(seq 1 $Total_locations); do
 	location=$(eval echo "\$Location_$j") 
 	echo "$location"
@@ -52,7 +56,7 @@ for j in $(seq 1 $Total_locations); do
 	rm -f samples1.txt		
 
 	#Present day, $10 is time period
-	awk  -F "\t" '{if ($10==0 && '"$location"') print $1}' "$M49Anno" >> samples1.txt
+	awk  -F "\t" '{if ($10==0 && ('"$location"')) print $1}' "$M49Anno" >> samples1.txt
 
 	x=($(wc samples1.txt))
 	n_target=${x[0]}
@@ -116,7 +120,7 @@ for j in $(seq 1 $Total_locations); do
 	do
 		#Extract out samples in windows of 1000 years ($10 is the time period) in the areas we are interested in
 		rm -f samples.txt	
-		awk -F "\t" -v var="$i" '{if ($10>(10*var-500) && $10<=(10*var+500) && '"$location"') print $1}' "$M49Anno" > samples.txt 
+		awk -F "\t" -v var="$i" '{if ($10>(10*var-500) && $10<=(10*var+500) && ('"$location"')) print $1}' "$M49Anno" > samples.txt 
 		x=($(wc samples.txt))
 		n_target=${x[0]}
 		start_year=$(( 10*($i)-500 ))
@@ -179,7 +183,7 @@ for j in $(seq 1 $Total_locations); do
 
 	rm -f samples2.txt
 	#Most ancient DNA >10000 years
-	awk -F "\t" '{if ($10>10000 && '"$location"') print $1}' "$M49Anno" >> samples2.txt
+	awk -F "\t" '{if ($10>10000 && ('"$location"')) print $1}' "$M49Anno" >> samples2.txt
 
 	x=($(wc samples2.txt))
 	n_target=${x[0]}
